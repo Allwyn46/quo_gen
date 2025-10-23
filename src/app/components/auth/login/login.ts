@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ZardCardComponent } from 'y/card/card.component';
 import { ZardButtonComponent } from 'y/button/button.component';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LoginFormat } from 'src/app/models/quo.model';
+import { Auth } from 'src/app/services/auth';
 
 @Component({
   selector: 'app-login',
@@ -14,13 +15,27 @@ import { LoginFormat } from 'src/app/models/quo.model';
 export class Login {
   idEmail = '';
   idPassword = '';
+  authService = inject(Auth);
+  router = inject(Router);
 
   loginform: FormGroup = new FormGroup<LoginFormat>({
-    username: new FormControl('',{nonNullable:true,validators:[Validators.required,Validators.email]),
-    password: new FormControl('',{nonNullable:true,validators:[Validators.required]})
+    username: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.email],
+    }),
+    password: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
   });
 
-  onlogin(){
-
+  onlogin() {
+    const formData = this.loginform.value;
+    this.authService.login(formData).subscribe({
+      next: (response: any) => {
+        this.router.navigateByUrl('dashboard');
+      },
+      error: (error) => {
+        alert(error);
+        window.location.reload();
+      },
+    });
   }
 }
